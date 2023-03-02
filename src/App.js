@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import axios from "axios";
 
 const CLIENT_ID = "1080467945186144308";
-const CLIENT_SECRET = "uOfG08pcNbvgjIzI8rll_HnSf3zSUrxw";
+const CLIENT_SECRET = "f390G_PMgDbC3vmFQfIunZGpAD4rO751";
 const REDIRECT_URI = "http://localhost:3000/callback";
 
 function App() {
@@ -27,6 +27,24 @@ function App() {
           sessionStorage.removeItem("access_token");
         });
     }
+  }, []);
+
+  useEffect(() => {
+    axios
+      .post("https://discord.com/api/oauth2/token", {
+        data: {
+          grant_type: "authorization_code",
+          code: new URLSearchParams(window.location.search).get("code"),
+          redirect_uri: REDIRECT_URI,
+          client_id: CLIENT_ID,
+          client_secret: CLIENT_SECRET,
+        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      })
+      .then((response) => {
+        const access_token = response.data.access_token;
+        sessionStorage.setItem("access_token", access_token);
+      });
   }, []);
 
   const handleLogin = () => {
