@@ -20,7 +20,8 @@ function App() {
             Authorization: `Bearer ${token}`,
           },
         })
-        .then(() => {
+        .then((res) => {
+          console.log(res);
           setIsAuthenticated(true);
         })
         .catch(() => {
@@ -30,21 +31,32 @@ function App() {
   }, []);
 
   useEffect(() => {
-    axios
-      .post("https://discord.com/api/oauth2/token", {
+    const code = new URLSearchParams(window.location.search).get("code");
+
+    if (code) {
+      axios({
+        method: "post",
+        url: "https://discord.com/api/oauth2/token",
         data: {
-          grant_type: "authorization_code",
-          code: new URLSearchParams(window.location.search).get("code"),
-          redirect_uri: REDIRECT_URI,
           client_id: CLIENT_ID,
           client_secret: CLIENT_SECRET,
+          grant_type: "authorization_code",
+          code: code,
+          redirect_uri: REDIRECT_URI,
         },
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       })
-      .then((response) => {
-        const access_token = response.data.access_token;
-        sessionStorage.setItem("access_token", access_token);
-      });
+        .then((response) => {
+          const access_token = response.data.access_token;
+          sessionStorage.setItem("access_token", access_token);
+          window.location.href = `/`;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   }, []);
 
   const handleLogin = () => {
